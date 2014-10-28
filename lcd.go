@@ -1,4 +1,4 @@
-// Package serial_lcd controls an Adafruit 16x2 serial-backpack LCD display, typically connected over USB.
+// Package serial_lcd controls an Adafruit 16x2 serial-backpack LCD display (e.g. connected over USB).
 //
 // This package is specifically designed to work with the Adafruit serial
 // backpack LCD kit (http://www.adafruit.com/products/784).
