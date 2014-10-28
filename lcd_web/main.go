@@ -32,9 +32,8 @@ func main() {
 	s := &server{lcd}
 
 	m := martini.Classic()
-	m.Handlers(martini.Recovery(), martini.Static("."))
-	// The homepage is served automatically by the static handler -- it'll
-	// serve index.html by default.
+	m.Handlers(martini.Recovery())
+	m.Get("/", func() string { return home })
 	m.Post("/set", s.Set)
 	http.ListenAndServe(*addr, m)
 }
@@ -95,3 +94,22 @@ func getText(key string, vals url.Values) (string, bool) {
 	}
 	return "", false
 }
+
+var home = `<html>
+<body>
+LCD Control:
+<hr>
+Text:<br><textarea rows=2 cols=16 oninput="set({txt:this.value})" onchange="set({txt:this.value})">Hi there!</textarea><br>
+Brightness: <input min=0 max=255 step=1 type=range
+  oninput="set({brightness:this.value})" onchange="set({brightness:this.value})"><br>
+Contrast: <input min=0 max=255 step=1 type=range
+  oninput="set({contrast:this.value})" onchange="set({contrast:this.value})"><br>
+Background: <input type=color oninput="set({background:this.value})" onchange="set({background:this.value})"><br>
+Autoscroll: <input type=checkbox onchange="set({autoscroll:this.checked})"><br>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>
+function set(vals) { $.post("/set", vals); }
+</script>
+</body>
+</html>
+`
