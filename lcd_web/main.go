@@ -62,6 +62,14 @@ func (s *server) Set(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if on, ok := getText("on", r.Form); ok {
+		if on == "true" {
+			s.lcd.On()
+		} else {
+			s.lcd.Off()
+		}
+	}
+
 	if vals, ok := r.Form["txt"]; ok && len(vals) == 1 {
 		s.lcd.Clear()
 		s.lcd.Home()
@@ -106,6 +114,7 @@ Contrast: <input min=0 max=255 step=1 type=range
   oninput="set({contrast:this.value})" onchange="set({contrast:this.value})"><br>
 Background: <input type=color oninput="set({background:this.value})" onchange="set({background:this.value})"><br>
 Autoscroll: <input type=checkbox onchange="set({autoscroll:this.checked})"><br>
+On: <input type=checkbox onchange="set({on:this.checked})"><br>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script>
 function set(vals) { $.post("/set", vals); }
