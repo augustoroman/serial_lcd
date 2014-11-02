@@ -26,7 +26,6 @@ import (
 
 type UnderlineCursorState uint8
 type BlockCursorState uint8
-type AutoscrollState uint8
 
 type LCD struct{ io.ReadWriteCloser }
 
@@ -50,6 +49,13 @@ func (l LCD) Off() error { return l.Raw(COMMAND, BACKLIGHT_OFF) }
 // On turns the LCD backlight on.
 func (l LCD) On() error { return l.Raw(COMMAND, BACKLIGHT_ON, 0) }
 
+func (l LCD) SetOn(on bool) error {
+	if on {
+		return l.On()
+	}
+	return l.Off()
+}
+
 // SetBrightness sets the LCD backlight brightness.  0-255 where 255 is the brightest.
 func (l LCD) SetBrightness(b uint8) error { return l.Raw(COMMAND, BRIGHTNESS, b) }
 
@@ -60,9 +66,15 @@ func (l LCD) SetContrast(c uint8) error { return l.Raw(COMMAND, CONTRAST, c) }
 // display.  When on, if more text is received than fits it will immediately be
 // scrolled so that the newest text is always at the bottom.  When off, as more
 // text is received the display wraps around to the beginning.
-func (l LCD) SetAutoscroll(a AutoscrollState) error { return l.Raw(COMMAND, byte(a)) }
-func (l LCD) SetSize(cols, rows uint8) error        { return l.Raw(COMMAND, SET_LCD_SIZE, cols, rows) }
-func (l LCD) Clear() error                          { return l.Raw(COMMAND, CLEAR) }
+func (l LCD) SetAutoscroll(on bool) error {
+	if on {
+		return l.Raw(COMMAND, AUTOSCROLL_ON)
+	} else {
+		return l.Raw(COMMAND, AUTOSCROLL_OFF)
+	}
+}
+func (l LCD) SetSize(cols, rows uint8) error { return l.Raw(COMMAND, SET_LCD_SIZE, cols, rows) }
+func (l LCD) Clear() error                   { return l.Raw(COMMAND, CLEAR) }
 
 func (l LCD) SetCursor(u UnderlineCursorState, b BlockCursorState) error {
 	return l.Raw(COMMAND, byte(u), COMMAND, byte(b))
@@ -132,11 +144,11 @@ const (
 	// the display, the text will automatically 'scroll' so the second line
 	// becomes the first line, etc. and new text is always at the bottom of the
 	// display.
-	AUTOSCROLL_ON = AutoscrollState(0x51)
+	AUTOSCROLL_ON = 0x51
 	// This will make it so when text is received and there's no more space on
 	// the display, the text will wrap around to start at the top of the
 	// display.
-	AUTOSCROLL_OFF = AutoscrollState(0x52)
+	AUTOSCROLL_OFF = 0x52
 
 	// after sending this command, write up to 32 characters (for 16x2) or up to
 	// 80 characters (for 20x4) that will appear as the splash screen during

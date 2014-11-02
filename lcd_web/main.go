@@ -55,19 +55,11 @@ func (s *server) Set(w http.ResponseWriter, r *http.Request) {
 		s.lcd.SetBG(r, g, b)
 	}
 	if a, ok := getText("autoscroll", r.Form); ok {
-		if a == "true" {
-			s.lcd.SetAutoscroll(serial_lcd.AUTOSCROLL_ON)
-		} else {
-			s.lcd.SetAutoscroll(serial_lcd.AUTOSCROLL_OFF)
-		}
+		s.lcd.SetAutoscroll(a == "true")
 	}
 
 	if on, ok := getText("on", r.Form); ok {
-		if on == "true" {
-			s.lcd.On()
-		} else {
-			s.lcd.Off()
-		}
+		s.lcd.SetOn(on == "true")
 	}
 
 	if vals, ok := r.Form["txt"]; ok && len(vals) == 1 {
