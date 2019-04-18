@@ -21,7 +21,7 @@ package serial_lcd
 import (
 	"io"
 
-	"github.com/tarm/goserial"
+	serial "github.com/tarm/goserial"
 )
 
 type UnderlineCursorState uint8
@@ -29,8 +29,22 @@ type BlockCursorState uint8
 
 type LCD struct{ io.ReadWriteCloser }
 
+type discardLCD struct{}
+
+func (d *discardLCD) Read(p []byte) (n int, err error)  { return 0, nil }
+func (d *discardLCD) Write(p []byte) (n int, err error) { return len(p), nil }
+func (d *discardLCD) Close() error                      { return nil }
+
+// Open opens the specified serial port (e.g. /dev/ttyACM0) with the specified
+// baud rate (e.g. 115200).
+//
+// When Open returns an error, the returned LCD discards all reads/writes, but
+// is safe to be used with all methods.
 func Open(port string, baud int) (LCD, error) {
 	s, err := serial.OpenPort(&serial.Config{Name: port, Baud: baud})
+	if err != nil {
+		return LCD{&discardLCD{}}, nil
+	}
 	return LCD{s}, err
 }
 
